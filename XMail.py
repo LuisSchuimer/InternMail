@@ -8,12 +8,15 @@ from colorama import Back, Fore
 from rich.console import Console
 from rich.theme import Theme
 
-global users_in_server, index_emails, selected_server_name, selected_server_ip
+global users_in_server, index_emails, selected_server_name
 
 colorama.init(autoreset=True)
 
 themes = Theme({"title": "underline yellow", "error": "bold red", "sucsess": "bold green"})
 console = Console(theme=themes)
+
+
+
 
 
 def encrypt(filename):
@@ -228,29 +231,48 @@ Users online: {users_in_server}
     while err == False:
         try:
             counter = counter + 1
+            decrypt(f"PROGRAM_DATA\Servers\server{counter}.txt", f"PROGRAM_DATA\Servers\server{counter}.txt.key")
             with open(f"PROGRAM_DATA\Servers\server{counter}.txt", "r")as name_server:
                 server_name = name_server.read()
-                if server_name == selected_server:
-                    err = True
-                    selected_server_name = selected_server
-                    with open(f"PROGRAM_DATA/Servers/{selected_server_name}_config_ip.txt", "r")as server_ip_read:
-                        selected_server_ip = server_ip_read.read()
-                    with open(f"PROGRAM_DATA/Servers/{selected_server_name}_config_port.txt", "r")as server_port_read:
-                        selected_server_port = server_port_read.read()
+            print(selected_server)
+            print(server_name)
+            if server_name == selected_server:
+                encrypt(f"PROGRAM_DATA\Servers\server{counter}.txt")
+                err = True
+                selected_server_name = selected_server
+                decrypt(f"PROGRAM_DATA/Servers/{selected_server_name}_config_ip.txt",
+                        f"PROGRAM_DATA/Servers/{selected_server_name}_config_ip.txt.key")
+                with open(f"PROGRAM_DATA/Servers/{selected_server_name}_config_ip.txt", "r")as server_ip_read:
+                    selected_server_ip = str(server_ip_read.read())
+                    print(selected_server_ip)
+                encrypt(f"PROGRAM_DATA/Servers/{selected_server_name}_config_ip.txt")
+                decrypt(f"PROGRAM_DATA/Servers/{selected_server_name}_config_port.txt",
+                        f"PROGRAM_DATA/Servers/{selected_server_name}_config_port.txt.key")
+                with open(f"PROGRAM_DATA/Servers/{selected_server_name}_config_port.txt", "r")as server_port_read:
+                    selected_server_port = int(server_port_read.read())
+                encrypt(f"PROGRAM_DATA/Servers/{selected_server_name}_config_port.txt")
 
         except Exception as Error:
+            print(Error)
+            input()
             if selected_server_name == "":
                 error("Error: 004: Server name couldn't be found in the registered servers. Please check your input!")
             err = True
     cls()
     print(f"Connencting to {selected_server_name}...")
     try:
+        decrypt("PROGRAM_DATA/User_DATA/username.txt", "PROGRAM_DATA/User_DATA/username.txt.key")
         with open("PROGRAM_DATA/User_DATA/username.txt", "r") as name_user_read:
             username_login = name_user_read.read()
+        encrypt("PROGRAM_DATA/User_DATA/username.txt")
+        decrypt("PROGRAM_DATA/User_DATA/password.txt", "PROGRAM_DATA/User_DATA/password.txt.key")
         with open("PROGRAM_DATA/User_DATA/password.txt", "r")as pass_user_read:
             password = pass_user_read.read()
+        encrypt("PROGRAM_DATA/User_DATA/password.txt")
+        decrypt("PROGRAM_DATA/User_DATA/email_addr.txt", "PROGRAM_DATA/User_DATA/email_addr.txt.key")
         with open("PROGRAM_DATA/User_DATA/email_addr.txt", "r")as email_addr_read:
             email_addr = email_addr_read.read()
+        encrypt("PROGRAM_DATA/User_DATA/email_addr.txt")
 
         client_socket = s.socket(s.AF_INET, s.SOCK_STREAM)
         client_socket.connect((selected_server_ip, int(selected_server_port)))
