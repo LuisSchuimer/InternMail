@@ -32,7 +32,7 @@ IP_address = socket.gethostbyname(h_name)
 print("Host Computer is: " + h_name)
 print("Server IP Address is: " + IP_address)
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.bind(("194.233.174.185", port))
+server_socket.bind((IP_address, port))
 server_socket.listen(1)
 
 def functions(client_socket, addr, server_socket, users):

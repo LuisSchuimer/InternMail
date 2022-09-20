@@ -16,6 +16,25 @@ themes = Theme({"title": "underline yellow", "error": "bold red", "sucsess": "bo
 console = Console(theme=themes)
 
 
+def encrypt(filename):
+    to_encrypt = open(filename, "rb").read()
+    size = len(to_encrypt)
+    key = os.urandom(size)
+    with open(filename + ".key ", "wb") as key_out:
+        key_out.write(key)
+    encrypted = bytes(a ^ b for (a, b) in zip(to_encrypt, key))
+    with open(filename, "wb") as encrypted_out:
+        encrypted_out.write(encrypted)
+
+
+def decrypt(filename, key):
+    file = open(filename, "rb").read()
+    key = open(key, "rb").read()
+    decrypted = bytes(a ^ b for (a, b) in zip(file, key))
+    with open(filename, "wb") as decrypted_out:
+        decrypted_out.write(decrypted)
+
+
 def settings(message, after):
     cls()
     logo_popup()
@@ -46,13 +65,16 @@ One more Thing there is a X-MailWorldWide Server provided by us! IP: 194.233.174
                 try:
                     with open(f"PROGRAM_DATA/Servers/server{counter}.txt", "w") as name_server_open:
                         name_server_open.write(server_name)
-                        print(f"[Info] Name in PROGRAMM_DATA/Servers/server1.txt...")
+                    encrypt(f"PROGRAM_DATA/Servers/server{counter}.txt")
+                    print(f"[Info] Name in PROGRAMM_DATA/Servers/server1.txt...")
                     with open(f"PROGRAM_DATA/Servers/{server_name}_config_ip.txt", "w") as ip_server:
                         ip_server.write(server_ip)
-                        print(f"[Info] ip in PROGRAMM_DATA/Servers/{server_name}_config_ip.txt...")
+                    encrypt(f"PROGRAM_DATA/Servers/{server_name}_config_ip.txt")
+                    print(f"[Info] ip in PROGRAMM_DATA/Servers/{server_name}_config_ip.txt...")
                     with open(f"PROGRAM_DATA/Servers/{server_name}_config_port.txt", "w") as port2_server:
                         port2_server.write(server_port)
-                        print(f"[Info] port in PROGRAMM_DATA/Servers/{server_name}_config_port.txt...")
+                    encrypt(f"PROGRAM_DATA/Servers/{server_name}_config_port.txt")
+                    print(f"[Info] port in PROGRAMM_DATA/Servers/{server_name}_config_port.txt...")
                     print(f"[{Fore.GREEN}Status{Fore.WHITE}] Data was saved as the {counter}. Server")
                     print(f"[{Fore.GREEN}Status{Fore.WHITE}] Server Data successfully saved on your PC!")
                     print()
@@ -89,13 +111,16 @@ One more Thing there is a X-MailWorldWide Server provided by us! IP: 194.233.174
         try:
             with open(f"PROGRAM_DATA/User_DATA/username.txt", "w") as name_user_open:
                 name_user_open.write(new_name)
-                print(f"[Info] Name in PROGRAMM_DATA/User_DATA/username.txt...")
+            encrypt(r"PROGRAM_DATA\User_DATA\username.txt")
+            print(f"[Info] Name in PROGRAMM_DATA/User_DATA/username.txt...")
             with open(f"PROGRAM_DATA/User_DATA/password.txt", "w") as pass_user_open:
                 pass_user_open.write(new_pass)
-                print(f"[Info] ip in PROGRAMM_DATA/User_DATA/password.txt...")
+            encrypt(r"PROGRAM_DATA\User_DATA\password.txt")
+            print(f"[Info] ip in PROGRAMM_DATA/User_DATA/password.txt...")
             with open(f"PROGRAM_DATA/User_DATA/email_addr.txt", "w") as user_addr_open:
                 user_addr_open.write(new_email)
-                print(f"[Info] port in PROGRAMM_DATA/User_DATA/email_addr.txt...")
+            encrypt(r'PROGRAM_DATA\User_DATA\email_addr.txt')
+            print(f"[Info] port in PROGRAMM_DATA/User_DATA/email_addr.txt...")
             print(f"[{Fore.GREEN}Status{Fore.WHITE}] Server Data successfully saved on your PC!")
             input("Press enter to start X-Mail again...")
         except:
@@ -124,7 +149,7 @@ def error(message):
 
 
 def logo_popup():
-    #Setup start
+    # Setup start
     print("""
 
    _  __      __  ___      _ __
@@ -165,12 +190,18 @@ def main():
         counter = counter + 1
         try:
             client_socket = s.socket(s.AF_INET, s.SOCK_STREAM)
+            decrypt(f"PROGRAM_DATA/Servers/server{counter}.txt", f"PROGRAM_DATA/Servers/server{counter}.txt.key")
             with open(f"PROGRAM_DATA/Servers/server{counter}.txt", "r") as server:
                 server_name = server.read()
+            encrypt(f"PROGRAM_DATA/Servers/server{counter}.txt")
+            decrypt(f"PROGRAM_DATA/Servers/{server_name}_config_ip.txt", f"PROGRAM_DATA/Servers/{server_name}_config_ip.txt.key")
             with open(f"PROGRAM_DATA/Servers/{server_name}_config_ip.txt", "r") as ipaddr:
                 server_ip = ipaddr.read()
+            encrypt(f"PROGRAM_DATA/Servers/{server_name}_config_ip.txt")
+            decrypt(f"PROGRAM_DATA/Servers/{server_name}_config_port.txt", f"PROGRAM_DATA/Servers/{server_name}_config_port.txt.key")
             with open(f"PROGRAM_DATA/Servers/{server_name}_config_port.txt", "r") as port_server:
                 server_port = port_server.read()
+            encrypt(f"PROGRAM_DATA/Servers/{server_name}_config_port.txt")
             client_socket.connect((server_ip, int(server_port)))
             client_socket.send(bytes("Data_list", "utf8"))
             users_in_server = str(client_socket.recv(2028), "utf8")
@@ -182,6 +213,8 @@ Users online: {users_in_server}
 -------------------------------
 """)
         except Exception as erro:
+            print(erro)
+            input()
             if erro == 2:
                 error("Error: 005: The Server couldn't be found!")
             error("Error: 001: No server registered!")
@@ -236,7 +269,8 @@ Users online: {users_in_server}
     except Exception as Error:
         print(Error)
 
-def main_menu(users_in_server,  selected_server_ip, selected_server_port):
+
+def main_menu(users_in_server, selected_server_ip, selected_server_port):
     # Main program
     print("Loading data...")
 
@@ -244,11 +278,6 @@ def main_menu(users_in_server,  selected_server_ip, selected_server_port):
     logo_popup()
     print(selected_server_ip)
     print("——————————————————————————Main Menu———————————————————————————————————————————————————")
-
-
-
-
-
 
 
 main()
